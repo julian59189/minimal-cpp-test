@@ -22,17 +22,22 @@ Fixtures:
 class ClassName : public cyrus:Test {
 public:
   // Perform initialization
-  void Setup() override { ... }
+  void Setup() override { 
+    x = 5;
+    ... 
+  }
   
   // Free resources
   void TearDown() override { ... }
   
   // declare member variables and functions
+  int x;
   ...
 }
 
 Test_F(ClassName, Test1) {
   // Setup is called already here
+  EXPECT_EQ(x, 5);
   ...
 }
 
