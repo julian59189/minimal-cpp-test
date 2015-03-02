@@ -18,7 +18,7 @@ TEST(GroupName, TestName) {
 }
 ```
 
-Fixture
+Fixtures:
 ```cpp
 class ClassName : public cyrus:Test {
 public:
