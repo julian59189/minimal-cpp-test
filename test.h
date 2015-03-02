@@ -48,16 +48,16 @@
 #define RUN_ALL_TESTS() cyrus::TestManager::GetInstance()->RunAll()
 
 #define _TEST(BaseClass, GroupName, TestName) \
-class TestName : public BaseClass { \
+class GroupName ## TestName : public BaseClass { \
 public: \
-  TestName() { \
+  GroupName ## TestName() { \
     cyrus::TestManager::GetInstance()->Register( \
       #GroupName, cyrus::TestEntry(#TestName, this)); \
   } \
   void Do() override; \
 }; \
-TestName test_##GroupName_##TestName; \
-void TestName::Do()
+GroupName ## TestName _ ## GroupName ## TestName; \
+void GroupName ## TestName::Do()
 
 #define TEST(GroupName, TestName) _TEST(cyrus::Test, GroupName, TestName)
 #define TEST_F(BaseClass, TestName) _TEST(BaseClass, BaseClass, TestName)
@@ -142,7 +142,7 @@ struct TestEntry {
 class TestManager {
  public:
   void Register(const std::string& name, const TestEntry& entry) {
-    std::cout << "Found " << entry.name << ".\n";
+    std::cout << "Found " << name << ":" << entry.name << ".\n";
     tests_.emplace(name, entry);
   }
 
