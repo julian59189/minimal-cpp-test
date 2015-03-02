@@ -141,8 +141,42 @@ struct TestEntry {
 
 class TestManager {
  public:
-  void Register(const std::string& name, const TestEntry& entry);
-  int RunAll();
+  void Register(const std::string& name, const TestEntry& entry) {
+    std::cout << "Found " << entry.name << ".\n";
+    tests_.emplace(name, entry);
+  }
+
+  int RunAll() {
+    std::cout << "------------------------\n";
+    std::cout << "Running " << tests_.size() << " tests:\n";
+    std::cout << "------------------------\n";
+    int failure = 0;
+    std::string cur_name;
+    for (const auto& it : tests_) {
+      if (it.first != cur_name) {
+        cur_name = it.first;
+        std::cout << "-- " << cur_name << "\n";
+      }
+      
+      auto& test = it.second;
+      std::cout << test.name << " ";
+      test.test->Setup();
+      try {
+        test.test->Do();
+        std::cout << "[Passed]\n";
+      } catch (TestFailed& ) {
+        std::cout << "[Failed]\n";
+        ++failure;
+      }
+      test.test->TearDown();
+    }
+    std::cout << "------------------------\n";
+    int success = (int)tests_.size() - failure;
+    std::cout << "A total of " << tests_.size() << " tests performed.\n";
+    std::cout << success << " tests passed.\n";
+    std::cout << failure << " tests failed.\n";
+    return failure > 0 ? 1 : 0;
+  }
   
   static TestManager* GetInstance() {
     static std::unique_ptr<TestManager> instance(new TestManager());
@@ -156,47 +190,6 @@ class TestManager {
 }
 
 #ifdef DEFINE_TEST_MAIN
-
-namespace cyrus {
-
-void TestManager::Register(const std::string& name, const TestEntry& entry) {
-  std::cout << "Found " << entry.name << ".\n";
-  tests_.emplace(name, entry);
-}
-
-int TestManager::RunAll() {
-  std::cout << "------------------------\n";
-  std::cout << "Running " << tests_.size() << " tests:\n";
-  std::cout << "------------------------\n";
-  int failure = 0;
-  std::string cur_name;
-  for (const auto& it : tests_) {
-    if (it.first != cur_name) {
-      cur_name = it.first;
-      std::cout << "-- " << cur_name << "\n";
-    }
-    
-    auto& test = it.second;
-    std::cout << test.name << " ";
-    test.test->Setup();
-    try {
-      test.test->Do();
-      std::cout << "[Passed]\n";
-    } catch (TestFailed& ) {
-      std::cout << "[Failed]\n";
-      ++failure;
-    }
-    test.test->TearDown();
-  }
-  std::cout << "------------------------\n";
-  int success = (int)tests_.size() - failure;
-  std::cout << "A total of " << tests_.size() << " tests performed.\n";
-  std::cout << success << " tests passed.\n";
-  std::cout << failure << " tests failed.\n";
-  return failure > 0 ? 1 : 0;
-}
-
-}
 
 int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
