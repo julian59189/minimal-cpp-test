@@ -9,10 +9,10 @@
 //
 //   // Simple test:
 //   TEST(GroupName, TestName) {
-//     ...
+//     EXPECT_EQ(1 + 2, 3);
 //   }
 //
-//   // Fixture
+//   // Fixtures:
 //   class ClassName : public cyrus:Test {
 //     void Setup() override { ... }
 //     void TearDown() override { ... }
