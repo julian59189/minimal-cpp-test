@@ -1,7 +1,6 @@
 # minimal-cpp-test
 
-Minimal C++ unit test single header library.
-Author: Vahid Kazemi
+Minimal C++ unit test single header library by Vahid Kazemi.
 
 Usage:
 ```cpp
