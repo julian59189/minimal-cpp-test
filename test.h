@@ -97,12 +97,12 @@ void TestName::Do()
 #define EXPECT_LT(X, Y) _EXPECT_PAIR(X, Y, x < y, "less than");
 #define EXPECT_LE(X, Y) _EXPECT_PAIR(X, Y, x <= y, "less or equal to");
 
-#define EXPECT_NO_THROW(EXPRESSION, EXCEPTION) { \
+#define EXPECT_NO_THROW(EXPRESSION) { \
   try { \
     EXPRESSION; \
-  } catch (EXCEPTION&) { \
+  } catch (...) { \
     _PRINT_FILE_AND_LINE \
-    std::cout << "Exception " #EXCEPTION " was thrown."; \
+    std::cout << "An exception was thrown."; \
     throw cyrus::TestFailed(); \
   } \
 }
