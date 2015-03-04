@@ -22,19 +22,19 @@
 //      ...
 //   }
 //
-//   Assertions:
-//     EXPECT_TRUE(X)  : expect x to be true
-//     EXPECT_FALSE(X) : expect x to be false
+//   // Assertions:
+//   EXPECT_TRUE(X)  // expect x to be true
+//   EXPECT_FALSE(X) // expect x to be false
 //
-//     EXPECT_EQ(X, Y) : expect x == y
-//     EXPECT_NE(X, Y) : expect x != y
-//     EXPECT_GT(X, Y) : expect x >  y
-//     EXPECT_GE(X, Y) : expect x >= y
-//     EXPECT_LT(X, Y) : expect x <  y
-//     EXPECT_LE(X, Y) : expect x <= y
+//   EXPECT_EQ(X, Y) // expect x == y
+//   EXPECT_NE(X, Y) // expect x != y
+//   EXPECT_GT(X, Y) // expect x >  y
+//   EXPECT_GE(X, Y) // expect x >= y
+//   EXPECT_LT(X, Y) // expect x <  y
+//   EXPECT_LE(X, Y) // expect x <= y
 //
-//     EXPECT_NO_THROW({ BLOCK })         : expect no exception
-//     EXPECT_THROW({ BLOCK }, EXCEPTION) : expect exception
+//   EXPECT_NO_THROW({ BLOCK })         // expect no exception
+//   EXPECT_THROW({ BLOCK }, EXCEPTION) // expect exception
 
 #pragma once
 
@@ -49,7 +49,7 @@
 
 #define _TEST(BaseClass, GroupName, TestName) \
 class GroupName ## TestName : public BaseClass { \
-public: \
+ public: \
   GroupName ## TestName() { \
     cyrus::TestManager::GetInstance()->Register( \
       #GroupName, cyrus::TestEntry(#TestName, this)); \
