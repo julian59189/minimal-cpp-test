@@ -21,7 +21,7 @@ enum LoggingLevel {
 
 #define LOG(LEVEL) \
   cyrus::LoggingStream(LEVEL) \
-  << "Error at " << __FILE__ << ":" << __LINE__ << "\n"
+  << __FILE__ << ":" << __LINE__ << "]: "
 
 #define _CYRUS_CAT_HELPER(X, Y) X ## Y
 #define _CYRUS_CAT(X, Y) _CYRUS_CAT_HELPER(X, Y)
@@ -62,7 +62,9 @@ namespace cyrus {
 
 class LoggingStream {
  public:
-  LoggingStream(LoggingLevel level) : level_(level) {}
+  LoggingStream(LoggingLevel level) : level_(level) {
+    std::cout << "[" << GetLevelString() << ":";
+  }
   ~LoggingStream() {
     std::cout << std::endl;
     if (level_ == FATAL) {
@@ -78,7 +80,7 @@ class LoggingStream {
 
   const char* GetLevelString() {
     static const char* level_string_[] = {
-      "Info", "Warning", "Error", "Fatal error"
+      "INFO", "WARNING", "ERROR", "FATAL_ERROR"
     };
     return level_string_[level_];
   }
