@@ -47,8 +47,6 @@ enum LoggingLevel {
 
 #define CHECK_EQ(X, Y) \
   _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) == _CYRUS_UNAME(y), "equal to")
-#define CHECK_EQ(X, Y) \
-  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) == _CYRUS_UNAME(y), "equal to")
 #define CHECK_NE(X, Y) \
   _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) != _CYRUS_UNAME(y), "different from")
 #define CHECK_GT(X, Y) \
