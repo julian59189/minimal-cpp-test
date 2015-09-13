@@ -20,7 +20,7 @@ enum LoggingLevel {
 };
 
 #define LOG(LEVEL) \
-  cyrus::LoggingStream(LEVEL).Stream() \
+  cyrus::LoggingStream(LEVEL) \
   << "Error at " << __FILE__ << ":" << __LINE__ << "\n"
 
 #define _CYRUS_CAT_HELPER(X, Y) X ## Y
@@ -73,10 +73,6 @@ class LoggingStream {
   template<typename T>
   LoggingStream& operator<<(T val) {
     std::cout << val;
-    return *this;
-  }
-
-  LoggingStream& Stream() {
     return *this;
   }
 
