@@ -20,14 +20,45 @@ enum LoggingLevel {
 };
 
 #define LOG(LEVEL) \
-  cyrus::LoggingStream(LEVEL).Stream(__FILE__, __LINE__)
+  cyrus::LoggingStream(LEVEL).Stream() \
+  << "Error at " << __FILE__ << ":" << __LINE__ << "\n"
 
-#define _CYRUS_LOG_STATEMENT(LEVEL, STATEMENT) \
-  cyrus::LoggingStream(LEVEL).Stream(__FILE__, __LINE__, STATEMENT)
+#define _CYRUS_CAT_HELPER(X, Y) X ## Y
+#define _CYRUS_CAT(X, Y) _CYRUS_CAT_HELPER(X, Y)
+#define _CYRUS_UNAME(X) _CYRUS_CAT(X, __LINE__)
 
-#define CHECK(STATEMENT) \
-  (STATEMENT) ? (void)0 : cyrus::VoidifyLoggingStream() & \
-  _CYRUS_LOG_STATEMENT(FATAL, #STATEMENT)
+#define _CYRUS_CHECK_SINGLE(X, EXPRESSION, TEXT) \
+  bool _CYRUS_UNAME(x) = X; \
+  EXPRESSION ? (void)0 : cyrus::VoidifyLoggingStream() & \
+  LOG(FATAL) << "Expected " #X " to be " TEXT ".\n" \
+             << "Got " #X " = " << _CYRUS_UNAME(x) << "\n"
+
+#define CHECK_TRUE(X) _CYRUS_CHECK_SINGLE(X, _CYRUS_UNAME(x), "true")
+#define CHECK_FALSE(X) _CYRUS_CHECK_SINGLE(X, !_CYRUS_UNAME(x), "false")
+#define CHECK(X) CHECK_TRUE(X)
+
+#define _CYRUS_CHECK_PAIR(X, Y, EXPRESSION, TEXT) \
+  auto _CYRUS_UNAME(x) = X; \
+  auto _CYRUS_UNAME(y) = Y; \
+  EXPRESSION ? (void)0 : cyrus::VoidifyLoggingStream() & \
+  LOG(FATAL) << "Expected " #X " to be " TEXT " " #Y ".\n" \
+             << "Got " #X " = " << _CYRUS_UNAME(x) << "\n" \
+             << "Got " #Y " = " << _CYRUS_UNAME(y) << "\n"
+
+#define CHECK_EQ(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) == _CYRUS_UNAME(y), "equal to")
+#define CHECK_EQ(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) == _CYRUS_UNAME(y), "equal to")
+#define CHECK_NE(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) != _CYRUS_UNAME(y), "different from")
+#define CHECK_GT(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) > _CYRUS_UNAME(y), "greather than")
+#define CHECK_GE(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) >= _CYRUS_UNAME(y), "greather or equal to")
+#define CHECK_LT(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) < _CYRUS_UNAME(y), "less than")
+#define CHECK_LE(X, Y) \
+  _CYRUS_CHECK_PAIR(X, Y, _CYRUS_UNAME(x) <= _CYRUS_UNAME(y), "less or equal to")
 
 namespace cyrus {
 
@@ -47,16 +78,7 @@ class LoggingStream {
     return *this;
   }
 
-  LoggingStream& Stream(const std::string& filename, int line) {
-    std::cout << "Error at " << filename << ":" << line << "\n";
-    return *this;
-  }
-
-  LoggingStream& Stream(const std::string& filename, int line,
-    const std::string& statement) {
-    std::cout << GetLevelString()
-              << ": at " << filename << ":" << line
-              << " while evaluating " << statement << ".\n";
+  LoggingStream& Stream() {
     return *this;
   }
 
@@ -74,6 +96,7 @@ class LoggingStream {
 class VoidifyLoggingStream {
  public:
   VoidifyLoggingStream() { }
+
   void operator&(const LoggingStream&) { }
 };
 

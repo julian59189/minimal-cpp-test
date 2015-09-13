@@ -47,7 +47,7 @@
 
 #define RUN_ALL_TESTS() cyrus::TestManager::GetInstance()->RunAll()
 
-#define _TEST(BaseClass, GroupName, TestName) \
+#define _CYRUS_TEST(BaseClass, GroupName, TestName) \
 class GroupName ## TestName : public BaseClass { \
  public: \
   GroupName ## TestName() { \
@@ -59,63 +59,87 @@ class GroupName ## TestName : public BaseClass { \
 GroupName ## TestName _ ## GroupName ## TestName; \
 void GroupName ## TestName::Do()
 
-#define TEST(GroupName, TestName) _TEST(cyrus::Test, GroupName, TestName)
-#define TEST_F(BaseClass, TestName) _TEST(BaseClass, BaseClass, TestName)
+#define TEST(GroupName, TestName) _CYRUS_TEST(cyrus::Test, GroupName, TestName)
+#define TEST_F(BaseClass, TestName) _CYRUS_TEST(BaseClass, BaseClass, TestName)
 
-#define _PRINT_FILE_AND_LINE \
+#define _CYRUS_TEST_PRINT_FILE_AND_LINE \
   std::cout << "\nError at " << __FILE__ << ":" << __LINE__ << "\n"; \
 
-#define _EXPECT_SINGLE(X, EXPRESSION, TEXT) { \
+#define _CYRUS_TEST_FAILED(ABORT) \
+  _CYRUS_TEST_FAILED_ = true; \
+  if (ABORT) throw cyrus::TestFailed();
+
+#define _CYRUS_EXPECT_SINGLE(X, EXPRESSION, TEXT, ABORT) { \
   bool x = X; \
   if (!(EXPRESSION)) { \
-    _PRINT_FILE_AND_LINE \
-    std::cout << "Expected " << #X << " to be " << TEXT << ".\n"; \
+    _CYRUS_TEST_PRINT_FILE_AND_LINE \
+    std::cout << "Expected " << #X << " to be " TEXT ".\n"; \
     std::cout << "Got " #X " = " << x << "\n"; \
-    throw cyrus::TestFailed(); \
+    _CYRUS_TEST_FAILED(ABORT) \
   } \
 }
 
-#define EXPECT_TRUE(X) _EXPECT_SINGLE(X, x, "true")
-#define EXPECT_FALSE(X) _EXPECT_SINGLE(X, !x, "false")
+#define EXPECT_TRUE(X) _CYRUS_EXPECT_SINGLE(X, x, "true", false)
+#define EXPECT_FALSE(X) _CYRUS_EXPECT_SINGLE(X, !x, "false", false)
 
-#define _EXPECT_PAIR(X, Y, EXPRESSION, TEXT) { \
+#define ASSERT_TRUE(X) _CYRUS_EXPECT_SINGLE(X, x, "true", true)
+#define ASSERT_FALSE(X) _CYRUS_EXPECT_SINGLE(X, !x, "false", true)
+
+#define _CYRUS_EXPECT_PAIR(X, Y, EXPRESSION, TEXT, ABORT) { \
   auto x = X; \
   auto y = Y; \
   if (!(EXPRESSION)) { \
-    _PRINT_FILE_AND_LINE \
+    _CYRUS_TEST_PRINT_FILE_AND_LINE \
     std::cout << "Expected " #X " to be " TEXT " " #Y ".\n"; \
     std::cout << "Got " #X " = " << x << "\n"; \
     std::cout << "Got " #Y " = " << y << "\n"; \
-    throw cyrus::TestFailed(); \
+    _CYRUS_TEST_FAILED(ABORT) \
   } \
 }
 
-#define EXPECT_EQ(X, Y) _EXPECT_PAIR(X, Y, x == y, "equal to");
-#define EXPECT_NE(X, Y) _EXPECT_PAIR(X, Y, x != y, "different from");
-#define EXPECT_GT(X, Y) _EXPECT_PAIR(X, Y, x > y, "greather than");
-#define EXPECT_GE(X, Y) _EXPECT_PAIR(X, Y, x >= y, "greather or equal to");
-#define EXPECT_LT(X, Y) _EXPECT_PAIR(X, Y, x < y, "less than");
-#define EXPECT_LE(X, Y) _EXPECT_PAIR(X, Y, x <= y, "less or equal to");
+#define EXPECT_EQ(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x == y, "equal to", false)
+#define EXPECT_NE(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x != y, "different from", false)
+#define EXPECT_GT(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x > y, "greather than", false)
+#define EXPECT_GE(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x >= y, "greather or equal to", false)
+#define EXPECT_LT(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x < y, "less than", false)
+#define EXPECT_LE(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x <= y, "less or equal to", false)
 
-#define EXPECT_NO_THROW(EXPRESSION) { \
+#define ASSERT_EQ(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x == y, "equal to", true)
+#define ASSERT_NE(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x != y, "different from", true)
+#define ASSERT_GT(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x > y, "greather than", true)
+#define ASSERT_GE(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x >= y, "greather or equal to", true)
+#define ASSERT_LT(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x < y, "less than", true)
+#define ASSERT_LE(X, Y) _CYRUS_EXPECT_PAIR(X, Y, x <= y, "less or equal to", true)
+
+#define _CYRUS_EXPECT_NO_THROW(EXPRESSION, ABORT) { \
   try { \
     EXPRESSION; \
   } catch (...) { \
-    _PRINT_FILE_AND_LINE \
+    _CYRUS_TEST_PRINT_FILE_AND_LINE \
     std::cout << "An exception was thrown."; \
-    throw cyrus::TestFailed(); \
+    _CYRUS_TEST_FAILED(ABORT) \
   } \
 }
 
-#define EXPECT_THROW(EXPRESSION, EXCEPTION) { \
+#define _CYRUS_EXPECT_THROW(EXPRESSION, EXCEPTION, ABORT) { \
   try { \
     EXPRESSION; \
-    _PRINT_FILE_AND_LINE \
+    _CYRUS_TEST_PRINT_FILE_AND_LINE \
     std::cout << "Exception " #EXCEPTION " was thrown."; \
-    throw cyrus::TestFailed(); \
+    _CYRUS_TEST_FAILED(ABORT) \
   } catch (EXCEPTION&) { \
   } \
 }
+
+#define EXPECT_NO_THROW(EXPRESSION) \
+  _CYRUS_EXPECT_NO_THROW(EXPRESSION, false)
+#define EXPECT_THROW(EXPRESSION, EXCEPTION) \
+  _CYRUS_EXPECT_THROW(EXPRESSION, EXCEPTION, false)
+
+#define ASSERT_NO_THROW(EXPRESSION) \
+  _CYRUS_EXPECT_NO_THROW(EXPRESSION, true)
+#define ASSERT_THROW(EXPRESSION, EXCEPTION) \
+  _CYRUS_EXPECT_THROW(EXPRESSION, EXCEPTION, true)
 
 namespace cyrus {
 
@@ -123,11 +147,13 @@ class TestFailed : public std::exception {};
 
 class Test {
  public:
-  Test() {}
+  Test() : _CYRUS_TEST_FAILED_(false) {}
 
   virtual void Setup() {}
   virtual void Do() = 0;
   virtual void TearDown() {}
+
+  bool _CYRUS_TEST_FAILED_;
 };
 
 struct TestEntry {
@@ -157,12 +183,14 @@ class TestManager {
         cur_name = it.first;
         std::cout << "-- " << cur_name << "\n";
       }
-      
+
       auto& test = it.second;
       std::cout << test.name << " ";
       test.test->Setup();
       try {
         test.test->Do();
+        if (test.test->_CYRUS_TEST_FAILED_)
+          throw TestFailed();
         std::cout << "[Passed]\n";
       } catch (TestFailed& ) {
         std::cout << "[Failed]\n";
@@ -177,7 +205,7 @@ class TestManager {
     std::cout << failure << " tests failed.\n";
     return failure > 0 ? 1 : 0;
   }
-  
+
   static TestManager* GetInstance() {
     static std::unique_ptr<TestManager> instance(new TestManager());
     return instance.get();
